@@ -40,7 +40,7 @@ const Timer = ({ timeLeft, totalTime, onTimeUp }) => {
 
     return (
         <div className="flex justify-center items-center bg-gray-100 rounded-md p-2 w-full mb-2">
-            <span className={`text-lg font-bold ${getTimerColor()}`}>
+            <span className={`text-5xl font-bold ${getTimerColor()}`}>
                 {formattedTimeLeft.minutes.toString().padStart(2, '0')} : {formattedTimeLeft.seconds.toString().padStart(2, '0')}
             </span>
         </div>

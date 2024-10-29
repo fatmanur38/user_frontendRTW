@@ -1,13 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import PersonalInfoPopup from '../Components/PersonelInfoPopUp';
+import PersonalInfoPopup from '../Components/PersonelInfoPopUp'; // Re-added PersonalInfoPopup
 import useInterviewStore from '../Stores/UserInterviewStore';
 import ProgressBar from '../Components/ProgressBar';
 import Timer from './Timer';
 
 const UserInterview = () => {
     const [isRecording, setIsRecording] = useState(false);
-    const [isFormOpen, setIsFormOpen] = useState(true);
+    const [isFormOpen, setIsFormOpen] = useState(true); // Set to true initially to show popup
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(null); // For current question time
     const [totalTimeLeft, setTotalTimeLeft] = useState(null); // For total interview time
@@ -31,7 +31,7 @@ const UserInterview = () => {
             setCurrentQuestionIndex(0);
             setTimeLeft(questions[0].time);
             const totalTimeInSeconds = questions.reduce((total, question) => total + question.time, 0);
-            setTotalTimeLeft(totalTimeInSeconds);
+            setTotalTimeLeft(totalTimeInSeconds); // Set total time initially but don't change it again
         }
     }, [questions]);
 
@@ -84,7 +84,7 @@ const UserInterview = () => {
         recorder.start();
         setIsRecording(true);
 
-        // Start timers
+        // Start question-specific timer
         startTimer();
     };
 
@@ -95,9 +95,8 @@ const UserInterview = () => {
         }
     };
 
-    // Start the question and total time countdown when the recording starts
+    // Start the question-specific countdown when the recording starts
     const startTimer = () => {
-        // Question-specific timer
         const questionInterval = setInterval(() => {
             setTimeLeft((prevTime) => {
                 if (prevTime > 0) {
@@ -110,24 +109,8 @@ const UserInterview = () => {
             });
         }, 1000);
 
-        // Total interview time timer
-        const totalInterval = setInterval(() => {
-            setTotalTimeLeft((prevTime) => {
-                if (prevTime > 0) {
-                    return prevTime - 1;
-                } else {
-                    clearInterval(totalInterval); // Stop when total time runs out
-                    stopRecording(); // Stop recording when total time is up
-                    return 0;
-                }
-            });
-        }, 1000);
-
         // Cleanup intervals when recording stops
-        return () => {
-            clearInterval(questionInterval);
-            clearInterval(totalInterval);
-        };
+        return () => clearInterval(questionInterval);
     };
 
     const handlePreview = async () => {
@@ -150,52 +133,79 @@ const UserInterview = () => {
     if (error) return <p className="text-red-500">Error loading interview: {error}</p>;
 
     return (
-        <div className="flex flex-col w-full h-screen bg-gray-100">
-            {/* Progress Bar */}
+        <div className="flex flex-col h-screen">
+            {/* Progress Bar at the Top */}
             <div className="w-full p-4">
                 <ProgressBar totalQuestions={questions.length} currentQuestion={currentQuestionIndex} />
             </div>
 
-            {/* Content (Video and Questions) */}
-            <div className="flex w-3/4 mx-auto flex-grow border rounded-lg p-4 bg-white">
-                {/* Video Section */}
-                <div className="w-1/2 flex justify-center items-center border-r-2 pr-4">
+            {/* Top Section: Timer on the left, logo on the right */}
+            <div className="flex justify-between w-full p-4 h-[23%]">
+
+                {/* Logo (Right) */}
+                <div className="w-[48%] ml-4 flex items-center bg-gray-100 rounded-2xl justify-center">
+                    <img src="https://remotetech.work/assets/img/logo/logo.svg" alt="Logo" className="w-2/3" />
+                </div>
+
+                {/* Timer (Left) */}
+                <div className="w-[48%] mr-4 flex items-center bg-gray-100 rounded-2xl justify-center">
+                    <div className="flex flex-col items-center">
+                        <Timer timeLeft={timeLeft} totalTime={totalTimeLeft} onTimeUp={handleTimeUp} />
+                        <div className="text-lg font-semibold">
+                            Total Time: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Section: Video on the left, Questions on the right */}
+            <div className="flex justify-between w-full h-[69%] p-4">
+                {/* Video Section (Left) */}
+                <div className="w-[48%] ml-4 flex items-center border shadow-md justify-center bg-white rounded-2xl">
                     <video ref={videoRef} className="w-full h-full bg-black rounded-lg" autoPlay muted></video>
                 </div>
 
-                {/* Question and Timer Section */}
-                <div className="w-1/2 flex flex-col justify-center pl-4">
-                    {/* Timer */}
-                    <Timer timeLeft={timeLeft} totalTime={totalTimeLeft} onTimeUp={handleTimeUp} />
+                {/* Questions and Buttons Section (Right) */}
+                <div className="w-[48%] mr-4 flex flex-col border shadow-md rounded-2xl justify-between bg-white p-4">
+                    <h2 className="text-4xl pt-8 flex items-center mt-10 justify-center font-semibold text-gray-700">
+                        Question {currentQuestionIndex + 1}
+                    </h2>
 
-                    {/* Question */}
-                    <div className={`flex flex-col justify-center flex-grow transition-opacity duration-300 ${fade ? 'opacity-0' : 'opacity-100'}`}>
-                        <h2 className="text-2xl font-bold text-left">Question:</h2>
-                        <p className="text-gray-700 text-6xl mt-2 text-center">{questions[currentQuestionIndex]?.question}</p>
+                    <div className={`flex flex-col justify-center items-center flex-grow transition-opacity duration-300 ${fade ? 'opacity-0' : 'opacity-100'}`}>
+                        <p className="text-5xl font-bold mt-4 mb-12 text-center text-[#001F54]">
+                            {questions[currentQuestionIndex]?.question}
+                        </p>
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex justify-between w-full mt-4">
+                    <div className="flex justify-around mt-4">
                         <button onClick={skipQuestion} className="px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400">
                             Skip
-                        </button>
-                        <button
-                            onClick={isRecording ? stopRecording : startRecording}
-                            className={`px-4 py-2 text-white font-semibold rounded-md ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-                        >
-                            {isRecording ? 'Done' : 'Start'}
                         </button>
                         <button
                             onClick={handlePreview}
                             className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600"
                         >
-                            Önizle
+                            Preview
+                        </button>
+                        <button
+                            onClick={isRecording ? stopRecording : startRecording}
+                            className={`px-4 py-2 text-white font-semibold rounded-md ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                        >
+                            {isRecording ? 'Stop' : 'Start Recording'}
                         </button>
                     </div>
                 </div>
             </div>
+
             {/* Personal Information Form Popup */}
-            <PersonalInfoPopup isOpen={isFormOpen} closePopup={() => setIsFormOpen(false)} savePersonalInfo={() => { }} />
+            <PersonalInfoPopup
+                isOpen={isFormOpen}
+                closePopup={() => setIsFormOpen(false)}
+                savePersonalInfo={() => {
+                    // Save personal info logic can go here
+                }}
+            />
         </div>
     );
 };

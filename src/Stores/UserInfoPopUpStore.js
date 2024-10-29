@@ -12,8 +12,9 @@ const useUserStore = create((set) => ({
 
         try {
             const response = await axios.post(`${apiURL}/users`, userData);
-
             set({ userInfo: response.data, status: 'success' });
+            console.log("response", response.data._id)
+
         } catch (error) {
             set({
                 error: error.response ? error.response.data : error.message,
