@@ -1,25 +1,22 @@
 import { create } from 'zustand';
 import axios from 'axios';
+
 const apiURL = import.meta.env.VITE_API_URL;
-console.log("apiURL: ", apiURL);
+
 const useUserStore = create((set) => ({
-    userInfo: {},
-    error: null,
     status: 'idle',
-    // Action to send the POST request using Axios
-    sendUserInfo: async (userData) => {
+    error: null,
+    userId: null,  // Store the user ID here
+
+    sendUserInfo: async (personalData) => {
         set({ status: 'loading', error: null });
-
         try {
-            const response = await axios.post(`${apiURL}/users`, userData);
-            set({ userInfo: response.data, status: 'success' });
-            console.log("response", response.data._id)
-
+            const response = await axios.post(`${apiURL}/users`, personalData);
+            set({ status: 'success', userId: response.data._id });  // Store the _id
+            console.log('User ID:', response.data._id);
         } catch (error) {
-            set({
-                error: error.response ? error.response.data : error.message,
-                status: 'error',
-            });
+            set({ status: 'error', error: error.message });
+            console.error('Error:', error);
         }
     },
 }));

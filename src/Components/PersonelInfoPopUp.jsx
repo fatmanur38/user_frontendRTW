@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import useUserStore from '../Stores/UserInfoPopUpStore';
 
-const PersonalInfoPopup = ({ isOpen, closePopup, savePersonalInfo }) => {
+const PersonalInfoPopup = ({ isOpen, closePopup }) => {
     const sendUserInfo = useUserStore((state) => state.sendUserInfo);
     const status = useUserStore((state) => state.status);
     const error = useUserStore((state) => state.error);
-    const [visible, setVisible] = useState(false); // Control visibility for animation
+    const [visible, setVisible] = useState(false);
 
-    // Animate the popup to slide down
     useEffect(() => {
         if (isOpen) {
             setVisible(true);
         } else {
-            setTimeout(() => setVisible(false), 500); // Allow the animation to complete
+            setTimeout(() => setVisible(false), 500);
         }
     }, [isOpen]);
 
-    if (!visible) return null; // Hide the component entirely when not visible
+    if (!visible) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -31,9 +30,8 @@ const PersonalInfoPopup = ({ isOpen, closePopup, savePersonalInfo }) => {
             note: "Yeni kullanıcı notu",
         };
 
-        closePopup();
-        console.log(personalData);
         sendUserInfo(personalData);
+        closePopup();
     };
 
     return (
