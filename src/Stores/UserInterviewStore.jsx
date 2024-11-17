@@ -14,7 +14,7 @@ const useInterviewStore = create((set) => ({
     fetchInterviewByLink: async (videoLink) => {
         set({ isLoading: true });
         try {
-            const response = await axios.get(`${apiURL}/interviews/link/${videoLink}`);
+            const response = await axios.get(`${apiURL}/api/interviews/link/${videoLink}`);
             const fetchedQuestions = response.data.interview.questions;
             set({ questions: fetchedQuestions, isLoading: false });
             console.log('Interview data:', response.data);
@@ -34,7 +34,7 @@ const useInterviewStore = create((set) => ({
 
         try {
             // Upload video to S3
-            const uploadResponse = await axios.post(`${apiURL}/s3/upload`, formData);
+            const uploadResponse = await axios.post(`${apiURL}/api/s3/upload`, formData);
             console.log('Video upload response:', uploadResponse.data);
 
             // Extract fileId from the response
@@ -45,24 +45,24 @@ const useInterviewStore = create((set) => ({
             console.log('User ID from useUserStore:', userId);
 
             // Get video info using the fileId
-            const videoInfoUrl = `${apiURL}/s3/videos/${fileId}`;
+            const videoInfoUrl = `${apiURL}/api/s3/videos/${fileId}`;
             const videoInfoResponse = await axios.get(videoInfoUrl);
             const videoUrl = videoInfoResponse.data.data.url;
             console.log('Video URL:', videoUrl);
 
             // Send the video URL to the user endpoint with a PUT request
-            const updateUserVideoUrl = `${apiURL}/users/${userId}/video-url`;
+            const updateUserVideoUrl = `${apiURL}/api/users/${userId}/video-url`;
             const updateResponse = await axios.put(updateUserVideoUrl, { userId, videoUrl });
             console.log('Update user video URL response:', updateResponse.data);
 
             // Retrieve the interview ID with videoLink
-            const resp = await axios.get(`${apiURL}/interviews/link/${videoLink}`);
+            const resp = await axios.get(`${apiURL}/api/interviews/link/${videoLink}`);
             const interviewID = resp.data.interview._id;
             set({ interviewID }); // Store interviewID in the state if needed
             console.log("Interview ID:", interviewID);
 
             // New PUT request to link the user to the interview
-            const linkUserToInterviewUrl = `${apiURL}/interviews/${interviewID}/users`;
+            const linkUserToInterviewUrl = `${apiURL}/api/interviews/${interviewID}/users`;
             const linkResponse = await axios.put(linkUserToInterviewUrl, {
                 userIds: [userId],
             });

@@ -11,7 +11,7 @@ const useUserStore = create((set) => ({
     sendUserInfo: async (personalData) => {
         set({ status: 'loading', error: null });
         try {
-            const response = await axios.post(`${apiURL}/users`, personalData);
+            const response = await axios.post(`${apiURL}/api/users`, personalData);
             set({ status: 'success', userId: response.data._id });  // Store the _id
             console.log('User ID:', response.data._id);
         } catch (error) {
