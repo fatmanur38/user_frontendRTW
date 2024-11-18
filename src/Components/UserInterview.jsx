@@ -13,6 +13,9 @@ const UserInterview = () => {
     const [totalTimeLeft, setTotalTimeLeft] = useState(null);
     const [fade, setFade] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
+    const [startTimer, setStartTimer] = useState(false);
+    const [isLoadingUpload, setIsLoadingUpload] = useState(false);
+    const [isUploadSuccess, setIsUploadSuccess] = useState(false);
     const videoRef = useRef(null);
     const recordedChunks = useRef([]);
     const { videolink } = useParams();
@@ -21,7 +24,7 @@ const UserInterview = () => {
     // Fetch interview by video link
     useEffect(() => {
         if (videolink) {
-            fetchInterviewByLink(videolink); // Pass videolink here
+            fetchInterviewByLink(videolink);
         }
     }, [videolink]);
 
@@ -40,8 +43,8 @@ const UserInterview = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setFade(true);
             setTimeout(() => {
-                setCurrentQuestionIndex(currentQuestionIndex + 1);
-                setTimeLeft(questions[currentQuestionIndex + 1].time);
+                setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+                setTimeLeft(questions[currentQuestionIndex + 1]?.time || 0);
                 setFade(false);
             }, 300);
         }
@@ -67,7 +70,8 @@ const UserInterview = () => {
         recorder.start();
         setIsRecording(true);
 
-        startTimer();
+        // Start timer when recording starts
+        setStartTimer(true);
     };
 
     // Stop recording video and upload it
@@ -79,27 +83,18 @@ const UserInterview = () => {
             mediaRecorder.onstop = async () => {
                 const blob = new Blob(recordedChunks.current, { type: 'video/webm' });
                 recordedChunks.current = [];
+                setIsLoadingUpload(true); // Show loading screen
 
-                // Call uploadVideo from the store with the video blob
-                await uploadVideo(blob, videolink);
+                try {
+                    await uploadVideo(blob, videolink);
+                    setIsLoadingUpload(false); // Hide loading screen
+                    setIsUploadSuccess(true); // Show success screen
+                } catch (error) {
+                    console.error('Video upload failed:', error);
+                    setIsLoadingUpload(false); // Hide loading screen
+                }
             };
         }
-    };
-
-    // Start the countdown timer for each question
-    const startTimer = () => {
-        const questionInterval = setInterval(() => {
-            setTimeLeft((prevTime) => {
-                if (prevTime > 0) {
-                    return prevTime - 1;
-                } else {
-                    clearInterval(questionInterval);
-                    handleTimeUp();
-                    return 0;
-                }
-            });
-        }, 1000);
-        return () => clearInterval(questionInterval);
     };
 
     // Preview the camera feed without recording
@@ -115,13 +110,37 @@ const UserInterview = () => {
     // Handle when the time for a question is up
     const handleTimeUp = () => {
         if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-            setTimeLeft(questions[currentQuestionIndex + 1].time);
+            setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+            setTimeLeft(questions[currentQuestionIndex + 1]?.time || 0);
         }
     };
 
     if (isLoading) return <p>Loading interview data...</p>;
     if (error) return <p className="text-red-500">Error loading interview: {error}</p>;
+
+    // Show loading screen during upload
+    if (isLoadingUpload) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+                <p className="text-white text-2xl font-semibold">Mülakat kaydediliyor...</p>
+            </div>
+        );
+    }
+
+    // Show success message after upload
+    if (isUploadSuccess) {
+        return (
+            <>
+                <div className="flex flex-col items-center justify-center h-screen bg-white">
+                    <p className="text-3xl font-bold text-green-600 mb-4">Mülakat kaydedildi!</p>
+                    <h1 className="text-2xl font-semibold text-gray-700 mt-4">
+                        Teşekkür ederiz. Sekmeyi Kapatabilirsiniz.
+                    </h1>
+                </div>
+
+            </>
+        );
+    }
 
     return (
         <div className="flex flex-col h-screen">
@@ -138,7 +157,7 @@ const UserInterview = () => {
 
                 <div className="w-[48%] mr-4 flex items-center bg-gray-100 rounded-2xl justify-center">
                     <div className="flex flex-col items-center">
-                        <Timer timeLeft={timeLeft} totalTime={totalTimeLeft} onTimeUp={handleTimeUp} />
+                        <Timer timeLeft={timeLeft} totalTime={totalTimeLeft} onTimeUp={handleTimeUp} start={startTimer} />
                         <div className="text-lg font-semibold">
                             Total Time: {Math.floor(totalTimeLeft / 60)}:{(totalTimeLeft % 60).toString().padStart(2, '0')}
                         </div>
@@ -166,19 +185,19 @@ const UserInterview = () => {
                     {/* Buttons */}
                     <div className="flex justify-around mt-4">
                         <button onClick={skipQuestion} className="px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400">
-                            Skip
+                            Soruyu Atla
                         </button>
                         <button
                             onClick={handlePreview}
                             className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600"
                         >
-                            Preview
+                            Kamerayı Önizle
                         </button>
                         <button
                             onClick={isRecording ? stopRecording : startRecording}
                             className={`px-4 py-2 text-white font-semibold rounded-md ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
                         >
-                            {isRecording ? 'Stop' : 'Start Recording'}
+                            {isRecording ? 'Mülakatı Bitir' : 'Mülakata Başla'}
                         </button>
                     </div>
                 </div>

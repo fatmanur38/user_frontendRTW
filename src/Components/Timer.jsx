@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const Timer = ({ timeLeft, totalTime, onTimeUp }) => {
+const Timer = ({ timeLeft, totalTime, onTimeUp, start }) => {
     const [currentTimeLeft, setCurrentTimeLeft] = useState(timeLeft);
 
     // Reset the timer whenever the timeLeft prop changes (i.e., when the question changes)
@@ -9,15 +9,19 @@ const Timer = ({ timeLeft, totalTime, onTimeUp }) => {
     }, [timeLeft]);
 
     useEffect(() => {
-        if (currentTimeLeft > 0) {
-            const timerInterval = setInterval(() => {
+        let timerInterval;
+        if (start && currentTimeLeft > 0) {
+            timerInterval = setInterval(() => {
                 setCurrentTimeLeft((prevTime) => prevTime - 1);
             }, 1000);
-            return () => clearInterval(timerInterval);
-        } else {
+        }
+
+        if (currentTimeLeft === 0) {
             onTimeUp(); // If time runs out, move to the next question
         }
-    }, [currentTimeLeft, onTimeUp]);
+
+        return () => clearInterval(timerInterval);
+    }, [currentTimeLeft, start, onTimeUp]);
 
     const formatTime = (time) => {
         const minutes = Math.floor(time / 60);

@@ -37,9 +37,6 @@ const PersonalInfoPopup = ({ isOpen, closePopup }) => {
     return (
         <div className={`fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 ${isOpen ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ease-in-out`}>
             <div className={`bg-white p-6 rounded-lg shadow-lg w-full max-w-lg mx-auto relative transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-y-0' : '-translate-y-10'}`}>
-                <button onClick={closePopup} className="absolute top-4 right-4 text-xl font-bold">
-                    &times;
-                </button>
                 <h2 className="text-xl font-bold mb-4">Personal Information Form</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
