@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-//
+
 const Timer = ({ timeLeft, totalTime, onTimeUp, start }) => {
     const [currentTimeLeft, setCurrentTimeLeft] = useState(timeLeft);
 
