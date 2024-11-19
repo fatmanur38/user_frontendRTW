@@ -26,8 +26,8 @@ const PersonalInfoPopup = ({ isOpen, closePopup }) => {
             email: e.target.email.value,
             phone: e.target.phone.value,
             videoUrl: "https://example.com/video",
-            status: "active",
-            note: "Yeni kullanıcı notu",
+            status: "inactive",
+            note: "Not Girilmemiş",
         };
 
         sendUserInfo(personalData);
@@ -35,8 +35,17 @@ const PersonalInfoPopup = ({ isOpen, closePopup }) => {
     };
 
     return (
-        <div className={`fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 ${isOpen ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ease-in-out`}>
-            <div className={`bg-white p-6 rounded-lg shadow-lg w-full max-w-lg mx-auto relative transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-y-0' : '-translate-y-10'}`}>
+        <div
+            className={`fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 transition-opacity duration-300 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'
+                }`}
+        >
+            <div
+                className={`bg-white p-6 rounded-lg shadow-lg relative transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-y-0' : '-translate-y-10'
+                    } w-full max-w-lg mx-auto 
+                lg:max-w-lg lg:rounded-lg lg:p-6 lg:max-h-[80%] lg:h-auto
+                md:w-full md:max-w-md md:p-4 md:max-h-[75%] md:h-auto
+                sm:w-full sm:max-w-full sm:rounded-none sm:h-screen sm:overflow-y-auto`}
+            >
                 <h2 className="text-xl font-bold mb-4">Personal Information Form</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -80,19 +89,16 @@ const PersonalInfoPopup = ({ isOpen, closePopup }) => {
                         />
                     </div>
                     <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            className="mr-2"
-                            required
-                        />
-                        <label className="text-sm">
-                            I have read and approved the KVKK text.
-                        </label>
+                        <input type="checkbox" className="mr-2" required />
+                        <label className="text-sm">I have read and approved the KVKK text.</label>
                     </div>
 
                     {status === 'error' && <p className="text-red-500">Error: {error}</p>}
 
-                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 rounded-md">
+                    <button
+                        type="submit"
+                        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 rounded-md"
+                    >
                         Submit
                     </button>
                 </form>
